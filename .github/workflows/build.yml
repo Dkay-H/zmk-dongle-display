@@ -1,25 +1,51 @@
 name: ZMK Build Test
 
 on:
-  workflow_dispatch:
   push:
-  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  build1:
     runs-on: ubuntu-latest
-    container:
-      image: zmkfirmware/zmk-build-arm:stable
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v2
 
-      - name: Init west
-        run: west init -l config
-
-      - name: Update west
-        run: west update
-
-      - name: Build firmware
+      - name: Setup Python and install west
         run: |
-          west build -s zmk/app -b nrf52840dongle_nrf52840 -- -DSHIELD=dongle_display
+          python3 -m pip install --upgrade pip
+          pip install west
+
+      - name: Set environment variables for Zephyr
+        run: |
+          # 필요시 Zephyr 경로와 SDK 위치를 수정하세요
+          echo "ZEPHYR_BASE=$GITHUB_WORKSPACE/zephyr" >> $GITHUB_ENV
+          echo "ZEPHYR_SDK_INSTALL_DIR=/opt/zephyr-sdk" >> $GITHUB_ENV
+
+      - name: Build firmware 1
+        run: |
+          # 환경 변수 로드 후 빌드
+          west build -s zmk/app -b nrf52840dongle_nrf52840 --DSHIELD=dongle_display
+
+  build2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup Python and install west
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install west
+
+      - name: Set environment variables for Zephyr
+        run: |
+          # 필요시 Zephyr 경로와 SDK 위치를 수정하세요
+          echo "ZEPHYR_BASE=$GITHUB_WORKSPACE/zephyr" >> $GITHUB_ENV
+          echo "ZEPHYR_SDK_INSTALL_DIR=/opt/zephyr-sdk" >> $GITHUB_ENV
+
+      - name: Build firmware 2
+        run: |
+          # 환경 변수 다시 로드 후 빌드
+          west build -s path/to/another/app -b nrf52840dongle_nrf52840 --DSHIELD=dongle_display
